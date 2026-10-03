@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html lang="en"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1.0"><title>Cricket Performance Tracker</title><link rel="stylesheet" href="style.css"></head>
+<body>
+<header><div class="container"><span>CRICKET PERFORMANCE</span><h1>Cricket Stats Tracker</h1><p>Track batting and bowling performance across your matches.</p></div></header>
+<main class="container">
+<section class="stats grid">
+<div><small>Matches</small><strong id="matches">0</strong></div><div><small>Runs</small><strong id="runs">0</strong></div><div><small>Wickets</small><strong id="wickets">0</strong></div><div><small>Economy</small><strong id="economy">0.00</strong></div><div><small>Batting Avg.</small><strong id="batAvg">0.00</strong></div><div><small>Bowling Avg.</small><strong id="bowlAvg">0.00</strong></div>
+</section>
+<section class="grid two">
+<div class="panel"><h2>Add Match</h2><form id="matchForm">
+<label>Date<input type="date" id="date" required></label>
+<label>Opponent<input id="opponent" required maxlength="40" placeholder="Rutgers"></label>
+<label>Runs Scored<input type="number" id="runsInput" min="0" value="0"></label>
+<label>Overs Bowled<input type="number" id="overs" min="0" step="0.1" value="0"></label>
+<label>Runs Conceded<input type="number" id="runsConceded" min="0" value="0"></label>
+<label>Wickets<input type="number" id="wicketsInput" min="0" value="0"></label>
+<button>Add Match</button></form></div>
+<div class="panel"><h2>Performance Summary</h2><div id="summary" class="summary"></div><button class="secondary" id="sample">Load Sample Data</button> <button class="danger" id="clear">Clear</button></div>
+</section>
+<section class="panel"><h2>Match History</h2><div class="table-wrap"><table><thead><tr><th>Date</th><th>Opponent</th><th>Runs</th><th>Overs</th><th>Runs Conceded</th><th>Wickets</th><th>Economy</th><th></th></tr></thead><tbody id="rows"></tbody></table></div></section>
+</main>
+<script>
+const KEY="dhruvCricketData";let matches=JSON.parse(localStorage.getItem(KEY)||"[]");const $=id=>document.getElementById(id);const num=x=>Number(x)||0;
+function save(){localStorage.setItem(KEY,JSON.stringify(matches));render()}function esc(s){return s.replace(/[&<>"']/g,m=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#039;"}[m]))}
+function render(){const m=matches.length,r=matches.reduce((a,x)=>a+x.runs,0),w=matches.reduce((a,x)=>a+x.wickets,0),rc=matches.reduce((a,x)=>a+x.runsConceded,0),o=matches.reduce((a,x)=>a+x.overs,0);$("matches").textContent=m;$("runs").textContent=r;$("wickets").textContent=w;$("economy").textContent=o?(rc/o).toFixed(2):"0.00";$("batAvg").textContent=m?(r/m).toFixed(2):"0.00";$("bowlAvg").textContent=w?(rc/w).toFixed(2):"0.00";$("summary").innerHTML=`<p><b>Total runs:</b> ${r}</p><p><b>Total wickets:</b> ${w}</p><p><b>Runs conceded:</b> ${rc}</p><p><b>Overs:</b> ${o.toFixed(1)}</p>`;$("rows").innerHTML=m?matches.map((x,i)=>`<tr><td>${x.date}</td><td>${esc(x.opponent)}</td><td>${x.runs}</td><td>${x.overs.toFixed(1)}</td><td>${x.runsConceded}</td><td>${x.wickets}</td><td>${x.overs?(x.runsConceded/x.overs).toFixed(2):"0.00"}</td><td><button class="danger small" data-i="${i}">Delete</button></td></tr>`).join(""):`<tr><td colspan="8" class="empty">No matches added yet.</td></tr>`;document.querySelectorAll("[data-i]").forEach(b=>b.onclick=()=>{matches.splice(+b.dataset.i,1);save()})}
+$("matchForm").onsubmit=e=>{e.preventDefault();matches.unshift({date:$("date").value,opponent:$("opponent").value.trim(),runs:num($("runsInput").value),overs:num($("overs").value),runsConceded:num($("runsConceded").value),wickets:num($("wicketsInput").value)});e.target.reset();save()};
+$("sample").onclick=()=>{matches=[{date:"2026-09-12",opponent:"Rutgers",runs:28,overs:4,runsConceded:18,wickets:3},{date:"2026-09-20",opponent:"Princeton",runs:14,overs:4,runsConceded:22,wickets:2},{date:"2026-09-27",opponent:"Columbia",runs:36,overs:4,runsConceded:18,wickets:4}];save()};
+$("clear").onclick=()=>{if(confirm("Clear all match data?")){matches=[];save()}};render();
+</script></body></html>
